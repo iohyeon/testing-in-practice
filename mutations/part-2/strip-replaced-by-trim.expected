@@ -1,1 +1,2 @@
-MemoTitleTest > [5] 　
+MemoCreateApiTest > 공백뿐인 제목은 400이다
+MemoTitleTest > [5] raw=　

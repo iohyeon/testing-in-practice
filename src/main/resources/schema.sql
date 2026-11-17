@@ -1,0 +1,8 @@
+CREATE TABLE IF NOT EXISTS memo (
+    id         BIGINT AUTO_INCREMENT PRIMARY KEY,
+    owner_id   VARCHAR(50)  NOT NULL,
+    title      VARCHAR(200) NOT NULL,
+    visibility VARCHAR(20)  NOT NULL,
+    status     VARCHAR(20)  NOT NULL,
+    created_at TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
