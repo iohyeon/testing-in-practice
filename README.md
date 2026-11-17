@@ -12,14 +12,15 @@
 | 2 | [정상, 예외, 경계를 테스트 케이스로 바꾸기 전에 정해야 하는 것](https://develop-tracking.tistory.com/entry/정상-예외-경계를-테스트-케이스로-바꾸기-전에-정해야-하는-것) | `part-2` | 제목 길이 50자 제한(코드 포인트 기준), 경계 테스트 |
 | 3 | [Mock을 언제 쓰고 무엇을 검증할까](https://develop-tracking.tistory.com/entry/Mock을-언제-쓰고-무엇을-검증할까-같은-기능을-Fake와-Mock으로-테스트해-보기) | `part-3` | 메모 등록 유스케이스, Fake 저장소와 Mock 저장소 비교 |
 | 4 | [테스트 준비 코드가 커질 때: 객체, JSON, SQL 중 무엇으로 준비할까](https://develop-tracking.tistory.com/entry/테스트-준비-코드가-커질-때-객체-JSON-SQL-중-무엇으로-준비할까) | `part-4` | 메모 보관, HTTP API, JDBC 저장소, JSON과 SQL로 준비하는 테스트 |
+| 5 | [가드를 지워도 통과하는 테스트: Mock 기본값, SQL 문장 검사, AI가 쓴 테스트](https://develop-tracking.tistory.com/entry/가드를-지워도-통과하는-테스트-Mock-기본값-SQL-문장-검사-AI가-쓴-테스트) | `part-5` | 메모 공유(Kotlin), 반대 결과 stub, SQL 문장 검사와 실행 검사 비교 |
 
 ## 실행
 
 JDK 21이 필요합니다. Gradle은 wrapper가 내려받습니다.
 
 ```bash
-./gradlew test          # 테스트 27건
-scripts/mutate.sh       # 글에 적은 구현 변경 실험 9개를 다시 실행
+./gradlew test          # 테스트 35건
+scripts/mutate.sh       # 글에 적은 구현 변경 실험 12개를 다시 실행
 ```
 
 특정 편의 상태로 돌아가려면 태그를 체크아웃합니다.
@@ -45,30 +46,37 @@ scripts/mutate.sh mutations/part-3
 | `part-3/event-published-before-save` | 저장 전에 이벤트 발송 | Fake 1건, Mock 2건 |
 | `part-4/shared-fixture-default-archived` | 공용 생성 함수의 기본 상태를 `ARCHIVED`로 | 기본값에 기대는 테스트 1건 |
 | `part-4/sql-merge-mode-removed` | `@SqlMergeMode(MERGE)` 제거 | 정리 스크립트가 실행되지 않아 기본 키 위반 1건 |
+| `part-5/owner-guard-removed` | 공유할 때 주인 확인 가드 제거 | 주인이 아닌 경우의 테스트 1건 |
+| `part-5/owner-guard-removed-under-unstubbed-test` | 같은 가드 제거, 테스트는 저장소를 stub하지 않고 `RuntimeException`만 확인하는 형태로 | 0건. stub하지 않은 `Int` 반환이 0이라 "이미 공유함" 예외가 대신 나서 통과한다 |
+| `part-5/shared-query-and-replaced-by-or` | 공유 목록 조회의 `AND m.status = 'ACTIVE'`를 `OR`로 | H2 실행 테스트 1건. SQL 문장 검사 테스트는 통과 |
+
+실패 0건을 기대하는 patch가 있어서, 컴파일이 깨져 테스트 결과가 아예 없으면 스크립트가 따로 "빌드 실패"로 보고합니다.
 
 1편 patch는 2편에서 대상 코드가 바뀌어 `main`에서 지웠습니다. `part-1` 태그에서 실행할 수 있습니다. 2편 `strip-replaced-by-trim`은 2편 시점에 1건이 실패했고, 4편에서 같은 입력을 보내는 API 테스트가 생겨 `main`에서는 2건이 실패합니다.
 
 ## 구조
 
 ```
-src/main/java/io/github/iohyeon/memo
+src/main/java/io/github/iohyeon/memo     1~4편 (Java)
+src/main/kotlin/io/github/iohyeon/memo   5편부터 (Kotlin). 패키지 구조는 같다
 ├─ domain                     MemoTitle, Memo, 상태와 공개 범위, 도메인 예외. 프레임워크 의존 없음
-├─ application                MemoService(등록, 보관)
-│  └─ port                    MemoRepository, MemoEvents. 유스케이스가 바깥에 요구하는 인터페이스
+├─ application                MemoService(등록, 보관), MemoShareService(공유)
+│  └─ port                    MemoRepository, MemoEvents, MemoViewers. 유스케이스가 바깥에 요구하는 인터페이스
 ├─ adapter
 │  ├─ in/web                  MemoController, 예외를 ProblemDetail로 옮기는 ApiExceptionHandler
 │  └─ out
-│     ├─ persistence          JdbcClient 기반 JdbcMemoRepository
+│     ├─ persistence          JdbcClient 기반 JdbcMemoRepository, JdbcMemoViewers
 │     └─ event                Spring 애플리케이션 이벤트로 발행하는 SpringMemoEvents
 └─ config                     도메인과 유스케이스를 Spring 빈으로 조립
 ```
 
 - `domain`과 `application`은 Spring에 의존하지 않습니다. 1~3편 테스트가 Spring 없이 몇 밀리초 안에 끝나는 이유입니다.
 - 테스트는 관찰하는 경계에 맞춰 준비 방식을 고릅니다. 도메인 규칙은 객체(`MemoTest`), HTTP 요청 본문은 JSON 파일(`MemoCreateApiTest`), DB 상태는 `@Sql` 스크립트(`MemoArchiveApiTest`)로 준비합니다.
-- 테스트 메서드 이름은 한국어로 쓰고 `_`를 공백으로 표시합니다. 실패 보고서에서 그대로 문장으로 읽히게 하려는 것입니다.
+- 5편부터 새 코드는 Kotlin으로 씁니다. 1~4편의 Java 코드는 글과 맞추기 위해 그대로 두고, 같은 Gradle 모듈에서 함께 컴파일합니다.
+- 테스트 메서드 이름은 한국어로 씁니다. Java는 `_`를 공백으로 표시하고, Kotlin은 백틱 안에 공백을 그대로 씁니다. 실패 보고서에서 그대로 문장으로 읽히게 하려는 것입니다.
 
 ## 환경
 
-Java 21, Gradle 8.10.2, Spring Boot 3.3.5, JUnit 5.10.5, Mockito 5.14.2, H2 2.2.224(인메모리).
+Java 21, Kotlin 2.0.21, Gradle 8.10.2, Spring Boot 3.3.5, JUnit 5.10.5, Mockito 5.14.2, H2 2.2.224(인메모리).
 
 Mockito는 JDK 21의 동적 attach 경고를 피하려고 테스트 JVM에 javaagent로 올립니다. 이 방식은 mockito-core 5.14부터 지원해, Spring Boot 3.3.5가 관리하는 5.11 대신 5.14.2를 씁니다.
