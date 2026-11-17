@@ -15,9 +15,18 @@ repositories {
     mavenCentral()
 }
 
+configurations {
+    mockitoAgent
+}
+
 dependencies {
     testImplementation platform('org.junit:junit-bom:5.10.5')
     testImplementation 'org.junit.jupiter:junit-jupiter'
+    testImplementation platform('org.mockito:mockito-bom:5.14.2')
+    testImplementation 'org.mockito:mockito-junit-jupiter'
+    mockitoAgent('org.mockito:mockito-core:5.14.2') {
+        transitive = false
+    }
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 }
 
@@ -27,4 +36,8 @@ tasks.withType(JavaCompile).configureEach {
 
 tasks.named('test') {
     useJUnitPlatform()
+    // Mockito의 inline mock maker를 동적 attach 대신 javaagent로 올린다(JDK 21 이후 동적 attach 경고 대응).
+    doFirst {
+        jvmArgs "-javaagent:${configurations.mockitoAgent.asPath}"
+    }
 }
