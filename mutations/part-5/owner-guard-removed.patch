@@ -1,0 +1,14 @@
+diff --git a/src/main/kotlin/io/github/iohyeon/memo/application/MemoShareService.kt b/src/main/kotlin/io/github/iohyeon/memo/application/MemoShareService.kt
+index fc34ae6..1341fa9 100644
+--- a/src/main/kotlin/io/github/iohyeon/memo/application/MemoShareService.kt
++++ b/src/main/kotlin/io/github/iohyeon/memo/application/MemoShareService.kt
+@@ -14,9 +14,6 @@ class MemoShareService(
+     /** 메모 주인만 다른 사용자에게 읽기 권한을 줄 수 있다. */
+     fun share(memoId: Long, requesterId: String, viewerId: String) {
+         val memo = memos.findById(memoId).orElseThrow { MemoNotFoundException(memoId) }
+-        if (memo.ownerId() != requesterId) {
+-            throw MemoAccessDeniedException(memoId, requesterId)
+-        }
+         if (viewers.add(memoId, viewerId) == 0) {
+             throw AlreadySharedException(memoId, viewerId)
+         }

@@ -33,6 +33,10 @@ while IFS= read -r patch; do
         echo "적용 실패  ${patch#"$root"/}"; mismatch=1; rm -rf "$work"; continue
     fi
     (cd "$work" && ./gradlew test --offline -q >/dev/null 2>&1) || true
+    # 컴파일이 깨지면 결과 XML이 없어 "실패 0건"으로 보인다. 실패 0건을 기대하는 patch가 있으므로 따로 막는다.
+    if ! compgen -G "$work/build/test-results/test/*.xml" >/dev/null; then
+        echo "빌드 실패  ${patch#"$root"/}"; mismatch=1; rm -rf "$work"; continue
+    fi
 
     actual="$(failed_tests "$work")"
     expected="$(sort "${patch%.patch}.expected" 2>/dev/null || true)"

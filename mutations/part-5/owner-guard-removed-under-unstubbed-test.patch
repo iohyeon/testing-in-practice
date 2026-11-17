@@ -1,0 +1,32 @@
+diff --git a/src/main/kotlin/io/github/iohyeon/memo/application/MemoShareService.kt b/src/main/kotlin/io/github/iohyeon/memo/application/MemoShareService.kt
+index fc34ae6..1341fa9 100644
+--- a/src/main/kotlin/io/github/iohyeon/memo/application/MemoShareService.kt
++++ b/src/main/kotlin/io/github/iohyeon/memo/application/MemoShareService.kt
+@@ -14,9 +14,6 @@ class MemoShareService(
+     /** 메모 주인만 다른 사용자에게 읽기 권한을 줄 수 있다. */
+     fun share(memoId: Long, requesterId: String, viewerId: String) {
+         val memo = memos.findById(memoId).orElseThrow { MemoNotFoundException(memoId) }
+-        if (memo.ownerId() != requesterId) {
+-            throw MemoAccessDeniedException(memoId, requesterId)
+-        }
+         if (viewers.add(memoId, viewerId) == 0) {
+             throw AlreadySharedException(memoId, viewerId)
+         }
+diff --git a/src/test/kotlin/io/github/iohyeon/memo/application/MemoShareServiceTest.kt b/src/test/kotlin/io/github/iohyeon/memo/application/MemoShareServiceTest.kt
+index c61c944..7468210 100644
+--- a/src/test/kotlin/io/github/iohyeon/memo/application/MemoShareServiceTest.kt
++++ b/src/test/kotlin/io/github/iohyeon/memo/application/MemoShareServiceTest.kt
+@@ -40,11 +40,9 @@ class MemoShareServiceTest {
+     @Test
+     fun `주인이 아니면 공유할 수 없다`() {
+         `when`(memos.findById(MEMO_ID)).thenReturn(Optional.of(memoOwnedBy("u1")))
+-        // 가드가 없을 때 추가가 성공하도록 반대 결과를 깔아 둔다. 그래야 거부의 이유가 가드 하나로 좁혀진다.
+-        // 가드가 동작하면 이 stub은 쓰이지 않으므로 엄격 모드의 미사용 stub 검사에서 뺀다.
+-        lenient().`when`(viewers.add(MEMO_ID, "u3")).thenReturn(1)
++        // 주인이 아니면 추가까지 가지 않으므로 viewers.add는 stub하지 않는다.
+ 
+-        assertThrows<MemoAccessDeniedException> { service.share(MEMO_ID, "u2", "u3") }
++        assertThrows<RuntimeException> { service.share(MEMO_ID, "u2", "u3") }
+     }
+ 
+     @Test

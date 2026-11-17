@@ -1,0 +1,13 @@
+diff --git a/src/main/kotlin/io/github/iohyeon/memo/adapter/out/persistence/JdbcMemoViewers.kt b/src/main/kotlin/io/github/iohyeon/memo/adapter/out/persistence/JdbcMemoViewers.kt
+index 436c71b..873080a 100644
+--- a/src/main/kotlin/io/github/iohyeon/memo/adapter/out/persistence/JdbcMemoViewers.kt
++++ b/src/main/kotlin/io/github/iohyeon/memo/adapter/out/persistence/JdbcMemoViewers.kt
+@@ -24,7 +24,7 @@ internal object MemoViewerSql {
+         FROM memo m
+         JOIN memo_viewer v ON v.memo_id = m.id
+         WHERE v.viewer_id = :viewerId
+-          AND m.status = 'ACTIVE'
++           OR m.status = 'ACTIVE'
+         ORDER BY m.id
+     """
+ }
