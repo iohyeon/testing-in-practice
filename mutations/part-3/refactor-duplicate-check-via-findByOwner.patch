@@ -1,13 +1,11 @@
-diff --git a/src/main/java/io/github/iohyeon/memo/application/MemoService.java b/src/main/java/io/github/iohyeon/memo/application/MemoService.java
-index 01f039f..d114e30 100644
 --- a/src/main/java/io/github/iohyeon/memo/application/MemoService.java
 +++ b/src/main/java/io/github/iohyeon/memo/application/MemoService.java
-@@ -22,7 +22,7 @@ public class MemoService {
+@@ -30,7 +30,7 @@
  
-     public long register(String ownerId, String rawTitle) {
+     public long register(String ownerId, String rawTitle, Visibility visibility) {
          MemoTitle title = new MemoTitle(rawTitle);
 -        if (repository.existsByOwnerAndTitle(ownerId, title.value())) {
 +        if (repository.findByOwner(ownerId).stream().anyMatch(m -> m.title().equals(title.value()))) {
              throw new DuplicateMemoException(title.value());
          }
-         Memo saved = repository.save(new Memo(null, ownerId, title.value(), Instant.now(clock)));
+         Memo saved = repository.save(

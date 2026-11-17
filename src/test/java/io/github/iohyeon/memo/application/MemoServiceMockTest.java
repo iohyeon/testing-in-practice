@@ -13,6 +13,8 @@ import io.github.iohyeon.memo.application.port.MemoEvents;
 import io.github.iohyeon.memo.application.port.MemoRepository;
 import io.github.iohyeon.memo.domain.DuplicateMemoException;
 import io.github.iohyeon.memo.domain.Memo;
+import io.github.iohyeon.memo.domain.MemoStatus;
+import io.github.iohyeon.memo.domain.Visibility;
 import java.time.Clock;
 import java.time.Instant;
 import java.time.ZoneOffset;
@@ -49,7 +51,7 @@ class MemoServiceMockTest {
         long id = service.register("u1", "  회의록  ");
 
         assertEquals(1L, id);
-        verify(repository, times(1)).save(new Memo(null, "u1", "회의록", NOW));
+        verify(repository, times(1)).save(new Memo(null, "u1", "회의록", Visibility.PRIVATE, MemoStatus.ACTIVE, NOW));
         verify(events).memoRegistered(1L, "u1");
     }
 

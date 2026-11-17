@@ -9,6 +9,8 @@ import static org.mockito.Mockito.verifyNoInteractions;
 import io.github.iohyeon.memo.application.port.MemoEvents;
 import io.github.iohyeon.memo.domain.DuplicateMemoException;
 import io.github.iohyeon.memo.domain.Memo;
+import io.github.iohyeon.memo.domain.MemoStatus;
+import io.github.iohyeon.memo.domain.Visibility;
 import java.time.Clock;
 import java.time.Instant;
 import java.time.ZoneOffset;
@@ -38,7 +40,7 @@ class MemoServiceFakeTest {
     void 등록하면_정리한_제목과_현재_시각으로_한_건_저장된다() {
         long id = service.register("u1", "  회의록  ");
 
-        assertEquals(List.of(new Memo(id, "u1", "회의록", NOW)), repository.findByOwner("u1"));
+        assertEquals(List.of(new Memo(id, "u1", "회의록", Visibility.PRIVATE, MemoStatus.ACTIVE, NOW)), repository.findByOwner("u1"));
     }
 
     @Test
