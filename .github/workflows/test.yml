@@ -17,3 +17,5 @@ jobs:
           java-version: '21'
       - uses: gradle/actions/setup-gradle@v4
       - run: ./gradlew test
+      - name: 글에 적은 구현 변경 실험 재현
+        run: scripts/mutate.sh

@@ -1,13 +1,13 @@
 diff --git a/src/main/java/io/github/iohyeon/memo/domain/MemoTitle.java b/src/main/java/io/github/iohyeon/memo/domain/MemoTitle.java
-index 41b1d20..cec4d3c 100644
+index 0c966c8..e5f5721 100644
 --- a/src/main/java/io/github/iohyeon/memo/domain/MemoTitle.java
 +++ b/src/main/java/io/github/iohyeon/memo/domain/MemoTitle.java
-@@ -5,7 +5,7 @@ public final class MemoTitle {
-     private final String value;
- 
-     public MemoTitle(String value) {
--        if (value == null || value.isBlank()) {
-+        if (value == null || value.isEmpty()) {
+@@ -19,7 +19,7 @@ public final class MemoTitle {
              throw new IllegalArgumentException("메모 제목은 비어 있을 수 없습니다.");
          }
-         this.value = value;
+         int length = stripped.codePointCount(0, stripped.length());
+-        if (length > MAX_LENGTH) {
++        if (length >= MAX_LENGTH) {
+             throw new IllegalArgumentException("메모 제목은 50자 이하여야 합니다.");
+         }
+         this.value = stripped;

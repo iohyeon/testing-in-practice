@@ -1,0 +1,13 @@
+diff --git a/src/main/java/io/github/iohyeon/memo/domain/MemoTitle.java b/src/main/java/io/github/iohyeon/memo/domain/MemoTitle.java
+index 0c966c8..d0c070e 100644
+--- a/src/main/java/io/github/iohyeon/memo/domain/MemoTitle.java
++++ b/src/main/java/io/github/iohyeon/memo/domain/MemoTitle.java
+@@ -14,7 +14,7 @@ public final class MemoTitle {
+         if (raw == null) {
+             throw new IllegalArgumentException("메모 제목은 비어 있을 수 없습니다.");
+         }
+-        String stripped = raw.strip();
++        String stripped = raw.trim();
+         if (stripped.isEmpty()) {
+             throw new IllegalArgumentException("메모 제목은 비어 있을 수 없습니다.");
+         }
