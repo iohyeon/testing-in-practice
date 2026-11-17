@@ -2,6 +2,8 @@ plugins {
     id 'java'
     id 'org.springframework.boot' version '3.3.5'
     id 'io.spring.dependency-management' version '1.1.6'
+    id 'org.jetbrains.kotlin.jvm' version '2.0.21'
+    id 'org.jetbrains.kotlin.plugin.spring' version '2.0.21'
 }
 
 group = 'io.github.iohyeon'
@@ -27,12 +29,20 @@ configurations {
 dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation 'org.springframework.boot:spring-boot-starter-jdbc'
+    implementation 'org.jetbrains.kotlin:kotlin-reflect'
     runtimeOnly 'com.h2database:h2'
 
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
     mockitoAgent('org.mockito:mockito-core') {
         transitive = false
+    }
+}
+
+// 5편부터 새 코드는 Kotlin으로 쓴다. Java 코드와 같은 모듈에서 함께 컴파일한다.
+kotlin {
+    compilerOptions {
+        freeCompilerArgs.add('-Xjsr305=strict')
     }
 }
 
