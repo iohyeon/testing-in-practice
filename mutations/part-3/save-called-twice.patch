@@ -1,0 +1,12 @@
+diff --git a/src/main/java/io/github/iohyeon/memo/application/MemoService.java b/src/main/java/io/github/iohyeon/memo/application/MemoService.java
+index 01f039f..2dc5a5b 100644
+--- a/src/main/java/io/github/iohyeon/memo/application/MemoService.java
++++ b/src/main/java/io/github/iohyeon/memo/application/MemoService.java
+@@ -26,6 +26,7 @@ public class MemoService {
+             throw new DuplicateMemoException(title.value());
+         }
+         Memo saved = repository.save(new Memo(null, ownerId, title.value(), Instant.now(clock)));
++        repository.save(saved);
+         events.memoRegistered(saved.id(), ownerId);
+         return saved.id();
+     }
